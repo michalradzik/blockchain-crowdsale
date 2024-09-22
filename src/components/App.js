@@ -1,100 +1,113 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { ethers } from 'ethers'
+import { ethers } from 'ethers';
 
-// Components
 import Navigation from './Navigation';
 import Buy from './Buy';
 import Progress from './Progress';
 import Info from './Info';
 import Loading from './Loading';
+import Whitelist from './Whitelist';  
 
-// Artifacts
-import CROWDSALE_ABI from '../abis/Crowdsale.json'
-import TOKEN_ABI from '../abis/Token.json'
+import CROWDSALE_ABI from '../abis/Crowdsale.json';
+import TOKEN_ABI from '../abis/Token.json';
 
-// Config
 import config from '../config.json';
 
 function App() {
-  const [provider, setProvider] = useState(null)
-  const [crowdsale, setCrowdsale] = useState(null)
-
-  const [account, setAccount] = useState(null)
-  const [accountBalance, setAccountBalance] = useState(0)
-
-  const [price, setPrice] = useState(0)
-  const [maxTokens, setMaxTokens] = useState(0)
-  const [tokensSold, setTokensSold] = useState(0)
-
-  const [isLoading, setIsLoading] = useState(true)
+  const [provider, setProvider] = useState(null);
+  const [crowdsale, setCrowdsale] = useState(null);
+  const [account, setAccount] = useState(null);
+  const [accountBalance, setAccountBalance] = useState(0);
+  const [price, setPrice] = useState(0);
+  const [maxTokens, setMaxTokens] = useState(0);
+  const [tokensSold, setTokensSold] = useState(0);
+  const [isWhitelisted, setIsWhitelisted] = useState(false);
+  const [minTokens, setMinTokens] = useState(0);
+  const [maxPurchaseTokens, setMaxPurchaseTokens] = useState(0);
+  const [saleState, setSaleState] = useState('Closed');
+  const [isLoading, setIsLoading] = useState(true);
 
   const loadBlockchainData = async () => {
-    // Intiantiate provider
-    const provider = new ethers.providers.Web3Provider(window.ethereum)
-    setProvider(provider)
+    const provider = new ethers.BrowserProvider(window.ethereum);
+    setProvider(provider);
 
-    // Fetch Chain ID
-    const { chainId } = await provider.getNetwork()
+    const accounts = await provider.send("eth_requestAccounts", []);
+    const account = accounts[0];
+    setAccount(account);
 
-    // Intiantiate contracts
-    const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider)
-    const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider)
-    setCrowdsale(crowdsale)
+    const { chainId } = await provider.getNetwork();
 
-    // Fetch account
-    const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const account = ethers.utils.getAddress(accounts[0])
-    setAccount(account)
+    const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
+    const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
+    setCrowdsale(crowdsale);
 
-    // Fetch account balance
-    const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18)
-    setAccountBalance(accountBalance)
+    const accountBalance = ethers.formatUnits(await token.balanceOf(account), 18);
+    setAccountBalance(accountBalance);
 
-    // Fetch price
-    const price = ethers.utils.formatUnits(await crowdsale.price(), 18)
-    setPrice(price)
+    const price = ethers.formatUnits(await crowdsale.price(), 18);
+    setPrice(price);
 
-    // Fetch max tokens
-    const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18)
-    setMaxTokens(maxTokens)
+    const maxTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
+    setMaxTokens(maxTokens);
 
-    // Fetch tokens sold
-    const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18)
-    setTokensSold(tokensSold)
+    const minTokens = ethers.formatUnits(await crowdsale.minTokens(), 18);
+    setMinTokens(minTokens);
 
-    setIsLoading(false)
-  }
+    const maxPurchaseTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
+    setMaxPurchaseTokens(maxPurchaseTokens);
+
+    const tokensSold = ethers.formatUnits(await crowdsale.tokensSold(), 18);
+    setTokensSold(tokensSold);
+
+    const isUserWhitelisted = await crowdsale.isWhitelisted(account);
+    setIsWhitelisted(isUserWhitelisted);
+
+    const currentSaleState = await crowdsale.getState();
+    setSaleState(currentSaleState === 0 ? 'Open' : 'Closed');
+
+    setIsLoading(false);
+  };
 
   useEffect(() => {
     if (isLoading) {
-      loadBlockchainData()
+      loadBlockchainData();
     }
-  }, [isLoading])
+  }, [isLoading]);
 
   return (
     <Container>
       <Navigation />
 
-      <h1 className='my-4 text-center'>Introducing DApp Token!</h1>
+      <h1 className="my-4 text-center">Introducing DApp Token!</h1>
 
       {isLoading ? (
         <Loading />
       ) : (
         <>
-          <p className='text-center'><strong>Current Price:</strong> {price} ETH</p>
-          <Buy provider={provider} price={price} crowdsale={crowdsale} setIsLoading={setIsLoading} />
+          <p className="text-center"><strong>Current Price:</strong> {price} ETH</p>
+          <Buy
+            provider={provider}
+            price={price}
+            crowdsale={crowdsale}
+            setIsLoading={setIsLoading}
+            isWhitelisted={isWhitelisted}
+            saleState={saleState}
+            minTokens={minTokens}
+            maxTokens={maxPurchaseTokens}
+          />
           <Progress maxTokens={maxTokens} tokensSold={tokensSold} />
+
+          <Whitelist provider={provider} crowdsale={crowdsale} />
         </>
       )}
 
       <hr />
 
-      {account && (
-        <Info account={account} accountBalance={accountBalance} />
-      )}
+      {account && <Info account={account} accountBalance={accountBalance} />}
     </Container>
   );
 }
 
 export default App;
+

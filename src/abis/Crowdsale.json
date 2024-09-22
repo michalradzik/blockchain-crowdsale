@@ -15,6 +15,16 @@
                 "internalType": "uint256",
                 "name": "_maxTokens",
                 "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_minTokens",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "_maxPurchaseTokens",
+                "type": "uint256"
             }
         ],
         "stateMutability": "nonpayable",
@@ -80,7 +90,33 @@
     },
     {
         "inputs": [],
+        "name": "owner",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
         "name": "maxTokens",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "minTokens",
         "outputs": [
             {
                 "internalType": "uint256",
@@ -107,24 +143,30 @@
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "_price",
-                "type": "uint256"
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
             }
         ],
-        "name": "setPrice",
+        "name": "addToWhitelist",
         "outputs": [],
         "stateMutability": "nonpayable",
         "type": "function"
     },
     {
-        "inputs": [],
-        "name": "token",
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_user",
+                "type": "address"
+            }
+        ],
+        "name": "isWhitelisted",
         "outputs": [
             {
-                "internalType": "contract Token",
+                "internalType": "bool",
                 "name": "",
-                "type": "address"
+                "type": "bool"
             }
         ],
         "stateMutability": "view",
@@ -138,6 +180,19 @@
                 "internalType": "uint256",
                 "name": "",
                 "type": "uint256"
+            }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "inputs": [],
+        "name": "getState",
+        "outputs": [
+            {
+                "internalType": "enum Crowdsale.SaleState",
+                "name": "",
+                "type": "uint8"
             }
         ],
         "stateMutability": "view",

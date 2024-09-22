@@ -1,4 +1,4 @@
-//SPDX-License-Identifier: Unlicense
+// SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
 import "hardhat/console.sol";
@@ -10,6 +10,7 @@ contract Crowdsale {
     Token public token;
     uint256 public price;
     uint256 public maxTokens;
+    uint256 public minTokens;
     uint256 public tokensSold;
     SaleState public saleState;
     uint256 public startTime;
@@ -19,26 +20,29 @@ contract Crowdsale {
     event Buy(uint256 amount, address buyer);
     event Finalize(uint256 tokensSold, uint256 ethRaised);
 
-   constructor(
+    constructor(
         Token _token,
         uint256 _price,
-        uint256 _maxTokens
+        uint256 _maxTokens,
+        uint256 _minTokens,
+        uint256 _maxPurchaseTokens
     ) {
         owner = msg.sender;
         token = _token;
         price = _price;
-        maxTokens = _maxTokens;
-        saleState = SaleState.Closed;
+        maxTokens = _maxPurchaseTokens;
+        minTokens = _minTokens;
+        saleState = SaleState.Open;
 
         startTime = block.timestamp;
         endTime = block.timestamp + 7 days;
-    
+
+        whiteList[owner] = true;
     }
 
-      modifier saleActive() {
+    modifier saleActive() {
         require(block.timestamp >= startTime, "Sale has not started yet");
         require(block.timestamp <= endTime, "Sale has ended");
-        saleState = SaleState.Open;
         _;
     }
 
@@ -47,34 +51,34 @@ contract Crowdsale {
         _;
     }
 
-    // Buy tokens directly by sending Ether
-    // --> https://docs.soliditylang.org/en/v0.8.15/contracts.html#receive-ether-function
-
     receive() external payable {
         uint256 amount = msg.value / price;
         buyTokens(amount * 1e18);
     }
 
     function addToWhitelist(address _user) public onlyOwner {
-
-    whiteList[_user] = true;
-}
-    function getState() public view returns (SaleState) {
-        return saleState;
+        whiteList[_user] = true;
     }
 
-function isWhitelisted(address _user) public view returns (bool) {
-    return whiteList[_user];
-}
+    function isWhitelisted(address _user) public view returns (bool) {
+        return whiteList[_user];
+    }
+
+    function getState() public view returns (SaleState) {
+        if (block.timestamp >= startTime && block.timestamp <= endTime) {
+            return SaleState.Open;
+        }
+        return SaleState.Closed;
+    }
 
     function buyTokens(uint256 _amount) public payable saleActive {
-        addToWhitelist(msg.sender);
         require(whiteList[msg.sender], "User is not whitelisted");
-        require(msg.value == (_amount / 1e18) * price);
-        require(token.balanceOf(address(this)) >= _amount);
-        require(token.transfer(msg.sender, _amount));
-        require(block.timestamp >= startTime, "Sale has not started yet");
-        require(getState()==SaleState.Open, "Sale has closed");
+        require(msg.value == (_amount / 1e18) * price, "Incorrect ETH amount sent");
+        require(token.balanceOf(address(this)) >= _amount, "Not enough tokens available");
+        require(_amount >= minTokens, "Amount is less than minimum purchase amount");
+        require(_amount <= maxTokens, "Amount exceeds maximum purchase amount");
+        require(token.transfer(msg.sender, _amount), "Token transfer failed");
+
         tokensSold += _amount;
 
         emit Buy(_amount, msg.sender);
@@ -84,7 +88,10 @@ function isWhitelisted(address _user) public view returns (bool) {
         price = _price;
     }
 
-    // Finalize Sale
+    function setMinTokens(uint256 _minTokens) public onlyOwner {
+        minTokens = _minTokens;
+    }
+
     function finalize() public onlyOwner {
         require(token.transfer(owner, token.balanceOf(address(this))));
 

@@ -1,6 +1,15 @@
-require("@nomicfoundation/hardhat-toolbox");
-
-/** @type import('hardhat/config').HardhatUserConfig */
+require("@nomicfoundation/hardhat-ethers");
+require("@nomicfoundation/hardhat-chai-matchers");
 module.exports = {
-  solidity: "0.8.9",
+  solidity: {
+    compilers: [
+      {
+        version: "0.5.5",  // Dla kontraktów OpenZeppelin Crowdsale
+      },
+      {
+        version: "0.8.9",  // Dla nowych kontraktów w wersji 0.8.x
+      },
+    ],
+  },
 };
+

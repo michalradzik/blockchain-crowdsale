@@ -1,40 +1,44 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
 const hre = require("hardhat");
 
 async function main() {
-  const NAME = 'Dapp University'
-  const SYMBOL = 'DAPP'
-  const MAX_SUPPLY = '1000000'
-  const PRICE = ethers.utils.parseUnits('0.025', 'ether')
+  const { ethers } = hre;
+  const { parseUnits } = ethers;
+
+  const NAME = 'Dapp University';
+  const SYMBOL = 'DAPP';
+  const MAX_SUPPLY = '1000000';
+  const PRICE = parseUnits('0.025', 'ether');
+  const MIN_TOKENS = parseUnits('1', 'ether');  // Minimalna liczba tokenów
+  const MAX_TOKENS = parseUnits('5', 'ether');  // Maksymalna liczba tokenów
 
   // Deploy Token
-  const Token = await hre.ethers.getContractFactory("Token")
-  const token = await Token.deploy(NAME, SYMBOL, MAX_SUPPLY)
-  await token.deployed()
+  const Token = await ethers.getContractFactory("Token");
+  const token = await Token.deploy(NAME, SYMBOL, MAX_SUPPLY);
+  console.log(`Token deployed to: ${token.target}\n`);
 
-  console.log(`Token deployed to: ${token.address}\n`)
+  // Używamy pełnej kwalifikacji, aby odwołać się do Twojego kontraktu Crowdsale
+  const Crowdsale = await ethers.getContractFactory("contracts/Crowdsale.sol:Crowdsale");
 
-  // Deploy Crowdsale
-  const Crowdsale = await hre.ethers.getContractFactory("Crowdsale")
-  const crowdsale = await Crowdsale.deploy(token.address, PRICE, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'))
-  await crowdsale.deployed();
+  // Deploy Crowdsale (teraz z dodanymi parametrami minTokens i maxTokens)
+  const crowdsale = await Crowdsale.deploy(
+    token.target,  // Adres wdrożonego tokena
+    PRICE, 
+    parseUnits(MAX_SUPPLY, 'ether'),
+    MIN_TOKENS,  // Minimalna liczba tokenów
+    MAX_TOKENS   // Maksymalna liczba tokenów
+  );
+  console.log(`Crowdsale deployed to: ${crowdsale.target}\n`);
 
-  console.log(`Crowdsale deployed to: ${crowdsale.address}\n`)
+  // Przekazanie tokenów na kontrakt crowdsale
+  const transaction = await token.transfer(crowdsale.target, parseUnits(MAX_SUPPLY, 'ether'));
+  await transaction.wait();
 
-  const transaction = await token.transfer(crowdsale.address, ethers.utils.parseUnits(MAX_SUPPLY, 'ether'))
-  await transaction.wait()
-
-  console.log(`Tokens transferred to Crowdsale\n`)
+  console.log(`Tokens transferred to Crowdsale\n`);
 }
 
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
 main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
+
+
