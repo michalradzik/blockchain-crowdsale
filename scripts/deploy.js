@@ -11,11 +11,11 @@ async function main() {
   const MIN_TOKENS = parseUnits('1', 'ether');
   const MAX_TOKENS = parseUnits('5', 'ether');
 
-  const Token = await ethers.getContractFactory("Token");
+  const Token = await hre.ethers.getContractFactory("Token");
   const token = await Token.deploy(NAME, SYMBOL, MAX_SUPPLY);
   console.log(`Token deployed to: ${token.target}\n`);
 
-  const Crowdsale = await ethers.getContractFactory("contracts/Crowdsale.sol:Crowdsale");
+  const Crowdsale = await hre.ethers.getContractFactory("contracts/Crowdsale.sol:Crowdsale");
 
   const crowdsale = await Crowdsale.deploy(
     token.target,
@@ -36,5 +36,3 @@ main().catch((error) => {
   console.error(error);
   process.exitCode = 1;
 });
-
-
