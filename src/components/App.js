@@ -44,22 +44,22 @@ function App() {
     const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
     setCrowdsale(crowdsale);
 
-    const accountBalance = ethers.formatUnits(await token.balanceOf(account), 18);
+    const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18);
     setAccountBalance(accountBalance);
 
-    const price = ethers.formatUnits(await crowdsale.price(), 18);
+    const price = ethers.utils.formatUnits(await crowdsale.price(), 18);
     setPrice(price);
 
-    const maxTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
+    const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18);
     setMaxTokens(maxTokens);
 
-    const minTokens = ethers.formatUnits(await crowdsale.minTokens(), 18);
+    const minTokens = ethers.utils.formatUnits(await crowdsale.minTokens(), 18);
     setMinTokens(minTokens);
 
-    const maxPurchaseTokens = ethers.formatUnits(await crowdsale.maxTokens(), 18);
+    const maxPurchaseTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18);
     setMaxPurchaseTokens(maxPurchaseTokens);
 
-    const tokensSold = ethers.formatUnits(await crowdsale.tokensSold(), 18);
+    const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18);
     setTokensSold(tokensSold);
 
     const isUserWhitelisted = await crowdsale.isWhitelisted(account);
