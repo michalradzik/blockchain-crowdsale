@@ -19,7 +19,7 @@ import config from '../config.json';
 function App() {
   const [provider, setProvider] = useState(null);
   const [crowdsale, setCrowdsale] = useState(null);
-  const [token, setToken] = useState(null); // Dodano stan tokenu
+  const [token, setToken] = useState(null);
   const [account, setAccount] = useState(null);
   const [accountBalance, setAccountBalance] = useState(0);
   const [price, setPrice] = useState(0);
@@ -44,11 +44,12 @@ function App() {
       console.log('Połączone konto:', account);
 
       const { chainId } = await provider.getNetwork();
-      console.log('Chain ID:', chainId);
+      const chainIdStr = chainId.toString(); // Konwersja BigInt na string
+      console.log('Chain ID:', chainIdStr);
 
-      const networkConfig = config[chainId];
+      const networkConfig = config[chainIdStr];
       if (!networkConfig) {
-        window.alert(`Brak konfiguracji dla sieci o chainId: ${chainId}`);
+        window.alert(`Brak konfiguracji dla sieci o chainId: ${chainIdStr}`);
         return;
       }
 
