@@ -1,6 +1,5 @@
 require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers");
-require("@nomicfoundation/hardhat-toolbox");
 require("dotenv").config();
 
 const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env;
