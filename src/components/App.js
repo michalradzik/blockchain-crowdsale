@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Container } from 'react-bootstrap';
-import { ethers } from 'ethers';
+import { ethers, formatUnits } from 'ethers';
 
 import Navigation from './Navigation';
 import Buy from './Buy';
@@ -32,43 +32,54 @@ function App() {
   const [saleEnd, setSaleEnd] = useState(new Date('2024-12-31T23:59:59'));
 
   const loadBlockchainData = async () => {
-    const provider = new ethers.BrowserProvider(window.ethereum);
-    setProvider(provider);
-    console.log(`Provider: ${provider}`);
-    const accounts = await provider.send("eth_requestAccounts", []);
-    const account = accounts[0];
-    setAccount(account);
-    const { chainId } = await provider.getNetwork();
-    console.log(`Chain ID: ${chainId}`);
-    const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
-    const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
-    setCrowdsale(crowdsale);
+    try {
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      setProvider(provider);
+      console.log(`Provider: ${provider}`);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const account = accounts[0];
+      setAccount(account);
+      const { chainId } = await provider.getNetwork();
+      console.log(`Chain ID: ${chainId}`);
 
-    const accountBalance = ethers.utils.formatUnits(await token.balanceOf(account), 18);
-    setAccountBalance(accountBalance);
+      const networkConfig = config[chainId];
+      if (!networkConfig) {
+        window.alert(`Brak konfiguracji dla sieci o chainId: ${chainId}`);
+        return;
+      }
 
-    const price = ethers.utils.formatUnits(await crowdsale.price(), 18);
-    setPrice(price);
+      const token = new ethers.Contract(networkConfig.token.address, TOKEN_ABI, provider);
+      const crowdsale = new ethers.Contract(networkConfig.crowdsale.address, CROWDSALE_ABI, provider);
+      setCrowdsale(crowdsale);
 
-    const maxTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18);
-    setMaxTokens(maxTokens);
+      const accountBalance = formatUnits(await token.balanceOf(account), 18);
+      setAccountBalance(accountBalance);
 
-    const minTokens = ethers.utils.formatUnits(await crowdsale.minTokens(), 18);
-    setMinTokens(minTokens);
+      const price = formatUnits(await crowdsale.price(), 18);
+      setPrice(price);
 
-    const maxPurchaseTokens = ethers.utils.formatUnits(await crowdsale.maxTokens(), 18);
-    setMaxPurchaseTokens(maxPurchaseTokens);
+      const maxTokens = formatUnits(await crowdsale.maxTokens(), 18);
+      setMaxTokens(maxTokens);
 
-    const tokensSold = ethers.utils.formatUnits(await crowdsale.tokensSold(), 18);
-    setTokensSold(tokensSold);
+      const minTokens = formatUnits(await crowdsale.minTokens(), 18);
+      setMinTokens(minTokens);
 
-    const isUserWhitelisted = await crowdsale.isWhitelisted(account);
-    setIsWhitelisted(isUserWhitelisted);
+      const maxPurchaseTokens = formatUnits(await crowdsale.maxTokens(), 18);
+      setMaxPurchaseTokens(maxPurchaseTokens);
 
-    const currentSaleState = await crowdsale.getState();
-    setSaleState(currentSaleState === 0n ? 'Open' : 'Closed');
+      const tokensSold = formatUnits(await crowdsale.tokensSold(), 18);
+      setTokensSold(tokensSold);
 
-    setIsLoading(false);
+      const isUserWhitelisted = await crowdsale.isWhitelisted(account);
+      setIsWhitelisted(isUserWhitelisted);
+
+      const currentSaleState = await crowdsale.getState();
+      setSaleState(currentSaleState === 0n ? 'Open' : 'Closed');
+
+      setIsLoading(false);
+    } catch (error) {
+      console.error("Wystąpił błąd podczas ładowania danych blockchain:", error);
+    }
   };
 
   useEffect(() => {
