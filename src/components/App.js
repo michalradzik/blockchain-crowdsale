@@ -35,10 +35,13 @@ function App() {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
-      console.log(`Provider: ${provider}`);
+      console.log(`Provider:`, provider);
+
       const accounts = await provider.send("eth_requestAccounts", []);
       const account = accounts[0];
       setAccount(account);
+      console.log(`Connected account: ${account}`);
+
       const { chainId } = await provider.getNetwork();
       console.log(`Chain ID: ${chainId}`);
 
@@ -48,33 +51,91 @@ function App() {
         return;
       }
 
-      const token = new ethers.Contract(networkConfig.token.address, TOKEN_ABI, provider);
-      const crowdsale = new ethers.Contract(networkConfig.crowdsale.address, CROWDSALE_ABI, provider);
+      console.log("Network Configuration:", networkConfig);
+
+      // Inicjalizacja kontraktu tokena z logowaniem
+      console.log("Initializing token contract...");
+      console.log("Token address:", networkConfig.token.address);
+      console.log("Token ABI:", TOKEN_ABI);
+
+      const token = new ethers.Contract(
+        networkConfig.token.address,
+        TOKEN_ABI,
+        provider
+      );
+      console.log("Token contract initialized:", token);
+
+      // Inicjalizacja kontraktu crowdsale z logowaniem
+      console.log("Initializing crowdsale contract...");
+      console.log("Crowdsale address:", networkConfig.crowdsale.address);
+      console.log("Crowdsale ABI:", CROWDSALE_ABI);
+
+      const crowdsale = new ethers.Contract(
+        networkConfig.crowdsale.address,
+        CROWDSALE_ABI,
+        provider
+      );
       setCrowdsale(crowdsale);
+      console.log("Crowdsale contract initialized:", crowdsale);
 
-      const accountBalance = formatUnits(await token.balanceOf(account), 18);
+      // Pobieranie salda konta
+      console.log(`Fetching balance for account: ${account}`);
+      const balanceRaw = await token.balanceOf(account);
+      console.log("Raw balance (in wei):", balanceRaw.toString());
+
+      const accountBalance = formatUnits(balanceRaw, 18);
       setAccountBalance(accountBalance);
+      console.log("Formatted account balance:", accountBalance);
 
-      const price = formatUnits(await crowdsale.price(), 18);
+      // Pobieranie ceny tokena
+      const priceRaw = await crowdsale.price();
+      console.log("Raw price (in wei):", priceRaw.toString());
+
+      const price = formatUnits(priceRaw, 18);
       setPrice(price);
+      console.log("Formatted price:", price);
 
-      const maxTokens = formatUnits(await crowdsale.maxTokens(), 18);
+      // Pobieranie maksymalnej liczby tokenów
+      const maxTokensRaw = await crowdsale.maxTokens();
+      console.log("Raw max tokens:", maxTokensRaw.toString());
+
+      const maxTokens = formatUnits(maxTokensRaw, 18);
       setMaxTokens(maxTokens);
+      console.log("Formatted max tokens:", maxTokens);
 
-      const minTokens = formatUnits(await crowdsale.minTokens(), 18);
+      // Pobieranie minimalnej liczby tokenów do zakupu
+      const minTokensRaw = await crowdsale.minTokens();
+      console.log("Raw min tokens:", minTokensRaw.toString());
+
+      const minTokens = formatUnits(minTokensRaw, 18);
       setMinTokens(minTokens);
+      console.log("Formatted min tokens:", minTokens);
 
-      const maxPurchaseTokens = formatUnits(await crowdsale.maxTokens(), 18);
+      // Pobieranie maksymalnej liczby tokenów do zakupu
+      const maxPurchaseTokensRaw = await crowdsale.maxTokens();
+      console.log("Raw max purchase tokens:", maxPurchaseTokensRaw.toString());
+
+      const maxPurchaseTokens = formatUnits(maxPurchaseTokensRaw, 18);
       setMaxPurchaseTokens(maxPurchaseTokens);
+      console.log("Formatted max purchase tokens:", maxPurchaseTokens);
 
-      const tokensSold = formatUnits(await crowdsale.tokensSold(), 18);
+      // Pobieranie liczby sprzedanych tokenów
+      const tokensSoldRaw = await crowdsale.tokensSold();
+      console.log("Raw tokens sold:", tokensSoldRaw.toString());
+
+      const tokensSold = formatUnits(tokensSoldRaw, 18);
       setTokensSold(tokensSold);
+      console.log("Formatted tokens sold:", tokensSold);
 
+      // Sprawdzanie, czy użytkownik jest na białej liście
       const isUserWhitelisted = await crowdsale.isWhitelisted(account);
       setIsWhitelisted(isUserWhitelisted);
+      console.log(`Is user whitelisted: ${isUserWhitelisted}`);
 
+      // Pobieranie stanu sprzedaży
       const currentSaleState = await crowdsale.getState();
       setSaleState(currentSaleState === 0n ? 'Open' : 'Closed');
+      console.log("Current sale state:", saleState);
 
       setIsLoading(false);
     } catch (error) {
