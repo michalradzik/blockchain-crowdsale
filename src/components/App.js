@@ -34,13 +34,12 @@ function App() {
   const loadBlockchainData = async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
     setProvider(provider);
-
+    console.log(`Provider: ${provider}`);
     const accounts = await provider.send("eth_requestAccounts", []);
     const account = accounts[0];
     setAccount(account);
-    console.log(provider)
     const { chainId } = await provider.getNetwork();
-    console.log(chainId)
+    console.log(`Chain ID: ${chainId}`);
     const token = new ethers.Contract(config[chainId].token.address, TOKEN_ABI, provider);
     const crowdsale = new ethers.Contract(config[chainId].crowdsale.address, CROWDSALE_ABI, provider);
     setCrowdsale(crowdsale);
