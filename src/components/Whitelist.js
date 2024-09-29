@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';  // Dodaj import useEffect
+import { useState, useEffect } from 'react';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Row from 'react-bootstrap/Row';
@@ -19,8 +19,8 @@ const Whitelist = ({ provider, crowdsale }) => {
                 setIsOwner(true);
             }
         };
-        checkOwner(); // Wywołaj funkcję sprawdzania właściciela wewnątrz useEffect
-    }, [provider, crowdsale]);  // Zależy od `provider` i `crowdsale`
+        checkOwner();
+    }, [provider, crowdsale]);
 
     const addToWhitelistHandler = async (e) => {
         e.preventDefault();
@@ -53,7 +53,7 @@ const Whitelist = ({ provider, crowdsale }) => {
                             {isWaiting ? (
                                 <Spinner animation="border" />
                             ) : (
-                                <Button variant="primary" type="submit" style={{ width: '100%' }}>
+                                <Button variant="whitelist" type="submit" style={{ width: '100%' }}>
                                     Add to Whitelist
                                 </Button>
                             )}
@@ -68,3 +68,4 @@ const Whitelist = ({ provider, crowdsale }) => {
 };
 
 export default Whitelist;
+

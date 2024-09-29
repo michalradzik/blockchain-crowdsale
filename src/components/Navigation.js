@@ -1,20 +1,16 @@
-import Navbar from 'react-bootstrap/Navbar';
 
 import logo from '../logo.png';
 
-const Navigation = () => {
-    return (
-        <Navbar className='my-3'>
-            <img
-                alt="logo"
-                src={logo}
-                width="40"
-                height="40"
-                className="d-inline-block align-top mx-3"
-            />
-            <Navbar.Brand href="#">DApp ICO Crowdsale</Navbar.Brand>
-        </Navbar>
-    );
-}
+const Navigation = () => (
+    <nav className="navbar navbar-expand-lg navbar-light bg-light">
+        <div className="container">
+            <a className="navbar-brand" href="/">
+                <img src={logo} alt="Logo" width="50" height="50" className="d-inline-block align-top" />
+                {' '}
+                DApp Token Sale
+            </a>
+        </div>
+    </nav>
+);
 
 export default Navigation;

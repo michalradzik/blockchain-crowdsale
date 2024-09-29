@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
+							 
 import "./Token.sol";
 
 contract Crowdsale {
@@ -35,7 +35,7 @@ contract Crowdsale {
         saleState = SaleState.Open;
 
         startTime = block.timestamp;
-        endTime = block.timestamp + 7 days;
+        endTime = block.timestamp + 365 days;
 
         whiteList[owner] = true;
     }
@@ -43,12 +43,22 @@ contract Crowdsale {
     modifier saleActive() {
         require(block.timestamp >= startTime, "Sale has not started yet");
         require(block.timestamp <= endTime, "Sale has ended");
-        _;
+        require(saleState == SaleState.Open, "Sale has ended");
+        _; 
     }
 
     modifier onlyOwner() {
         require(msg.sender == owner, "Caller is not the owner");
-        _;
+        _; 
+    }
+
+    function setSaleState(uint _state) public onlyOwner {
+        require(_state == 0 || _state == 1, "Invalid state");
+        saleState = SaleState(_state);
+    }
+
+    function setPrice(uint256 _price) external onlyOwner {
+        price = _price;
     }
 
     receive() external payable {
@@ -69,8 +79,8 @@ contract Crowdsale {
             return SaleState.Open;
         }
         return SaleState.Closed;
-    }
-
+    }														 
+																		 
     function buyTokens(uint256 _amount) public payable saleActive {
         require(whiteList[msg.sender], "User is not whitelisted");
         require(msg.value == (_amount / 1e18) * price, "Incorrect ETH amount sent");
@@ -84,13 +94,9 @@ contract Crowdsale {
         emit Buy(_amount, msg.sender);
     }
 
-    function setPrice(uint256 _price) public onlyOwner {
-        price = _price;
-    }
-
     function setMinTokens(uint256 _minTokens) public onlyOwner {
         minTokens = _minTokens;
-    }
+    }												
 
     function finalize() public onlyOwner {
         require(token.transfer(owner, token.balanceOf(address(this))));

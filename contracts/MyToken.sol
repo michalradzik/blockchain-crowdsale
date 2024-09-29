@@ -1,5 +1,3 @@
-// contracts/MyToken.sol
-// SPDX-License-Identifier: MIT
 pragma solidity ^0.5.5;
 
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";

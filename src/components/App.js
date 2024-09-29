@@ -8,6 +8,8 @@ import Progress from './Progress';
 import Info from './Info';
 import Loading from './Loading';
 import Whitelist from './Whitelist';  
+import CountdownTimer from './CountdownTimer';
+import './App.css';
 
 import CROWDSALE_ABI from '../abis/Crowdsale.json';
 import TOKEN_ABI from '../abis/Token.json';
@@ -27,6 +29,7 @@ function App() {
   const [maxPurchaseTokens, setMaxPurchaseTokens] = useState(0);
   const [saleState, setSaleState] = useState('Closed');
   const [isLoading, setIsLoading] = useState(true);
+  const [saleEnd, setSaleEnd] = useState(new Date('2024-12-31T23:59:59'));
 
   const loadBlockchainData = async () => {
     const provider = new ethers.BrowserProvider(window.ethereum);
@@ -64,7 +67,7 @@ function App() {
     setIsWhitelisted(isUserWhitelisted);
 
     const currentSaleState = await crowdsale.getState();
-    setSaleState(currentSaleState === 0 ? 'Open' : 'Closed');
+    setSaleState(currentSaleState === 0n ? 'Open' : 'Closed');
 
     setIsLoading(false);
   };
@@ -76,16 +79,18 @@ function App() {
   }, [isLoading]);
 
   return (
-    <Container>
+    <Container className="text-light">
       <Navigation />
 
-      <h1 className="my-4 text-center">Introducing DApp Token!</h1>
+      <h1 className="my-4 text-center">Introducing <span className="text-highlight">DApp Token!</span></h1>
 
       {isLoading ? (
         <Loading />
       ) : (
         <>
+          <CountdownTimer saleEnd={saleEnd} />
           <p className="text-center"><strong>Current Price:</strong> {price} ETH</p>
+          <p className="text-center"><strong>Sale State:</strong> {saleState}</p>
           <Buy
             provider={provider}
             price={price}
@@ -97,7 +102,6 @@ function App() {
             maxTokens={maxPurchaseTokens}
           />
           <Progress maxTokens={maxTokens} tokensSold={tokensSold} />
-
           <Whitelist provider={provider} crowdsale={crowdsale} />
         </>
       )}
@@ -110,4 +114,3 @@ function App() {
 }
 
 export default App;
-

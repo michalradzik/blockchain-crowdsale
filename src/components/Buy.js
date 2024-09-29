@@ -53,7 +53,7 @@ const Buy = ({ provider, price, crowdsale, setIsLoading, isWhitelisted, saleStat
                         <Spinner animation="border" />
                     ) : isWhitelisted ? (
                         saleState === 'Open' ? (
-                            <Button variant="primary" type="submit" style={{ width: '100%' }}>
+                            <Button variant="buy" type="submit" style={{ width: '100%' }}>
                                 Buy Tokens
                             </Button>
                         ) : (
