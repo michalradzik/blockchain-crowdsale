@@ -36,29 +36,19 @@ function App() {
     try {
       const provider = new ethers.BrowserProvider(window.ethereum);
       setProvider(provider);
-      console.log('Provider:', provider);
 
       const accounts = await provider.send('eth_requestAccounts', []);
       const account = accounts[0];
       setAccount(account);
-      console.log('Połączone konto:', account);
 
       const { chainId } = await provider.getNetwork();
-      const chainIdStr = chainId.toString(); // Konwersja BigInt na string
-      console.log('Chain ID:', chainIdStr);
+      const chainIdStr = chainId.toString();
 
       const networkConfig = config[chainIdStr];
       if (!networkConfig) {
-        window.alert(`Brak konfiguracji dla sieci o chainId: ${chainIdStr}`);
+        window.alert(`No configuration for network with chainId: ${chainIdStr}`);
         return;
       }
-
-      console.log('Konfiguracja sieci:', networkConfig);
-
-      // Inicjalizacja kontraktu tokena z logowaniem
-      console.log('Inicjalizacja kontraktu tokena...');
-      console.log('Adres tokena:', networkConfig.token.address);
-      console.log('ABI tokena:', TOKEN_ABI);
 
       const token = new ethers.Contract(
         networkConfig.token.address,
@@ -66,12 +56,6 @@ function App() {
         provider
       );
       setToken(token);
-      console.log('Kontrakt tokena zainicjalizowany:', token);
-
-      // Inicjalizacja kontraktu crowdsale z logowaniem
-      console.log('Inicjalizacja kontraktu crowdsale...');
-      console.log('Adres crowdsale:', networkConfig.crowdsale.address);
-      console.log('ABI crowdsale:', CROWDSALE_ABI);
 
       const crowdsale = new ethers.Contract(
         networkConfig.crowdsale.address,
@@ -79,112 +63,40 @@ function App() {
         provider
       );
       setCrowdsale(crowdsale);
-      console.log('Kontrakt crowdsale zainicjalizowany:', crowdsale);
 
-      // Pobieranie salda konta
-      console.log(`Pobieranie salda dla konta: ${account}`);
       const balanceRaw = await token.balanceOf(account);
-      console.log('Saldo surowe (w wei):', balanceRaw.toString());
-
       const accountBalance = formatUnits(balanceRaw, 18);
       setAccountBalance(accountBalance);
-      console.log('Sformatowane saldo konta:', accountBalance);
 
-      // Pobieranie całkowitej podaży tokena
-      const totalSupplyRaw = await token.totalSupply();
-      console.log('Całkowita podaż tokena (surowa):', totalSupplyRaw.toString());
-
-      const totalSupply = formatUnits(totalSupplyRaw, 18);
-      console.log('Całkowita podaż tokena (sformatowana):', totalSupply);
-
-      // Pobieranie nazwy tokena
-      const tokenName = await token.name();
-      console.log('Nazwa tokena:', tokenName);
-
-      // Pobieranie symbolu tokena
-      const tokenSymbol = await token.symbol();
-      console.log('Symbol tokena:', tokenSymbol);
-
-      // Pobieranie liczby miejsc dziesiętnych tokena
-      const tokenDecimals = await token.decimals();
-      console.log('Liczba miejsc dziesiętnych tokena:', tokenDecimals);
-
-      // Pobieranie właściciela tokena (jeśli dotyczy)
-      if (token.owner) {
-        const tokenOwner = await token.owner();
-        console.log('Właściciel tokena:', tokenOwner);
-      }
-
-      // Pobieranie ceny tokena
       const priceRaw = await crowdsale.price();
-      console.log('Cena surowa (w wei):', priceRaw.toString());
-
       const price = formatUnits(priceRaw, 18);
       setPrice(price);
-      console.log('Sformatowana cena:', price);
 
-      // Pobieranie maksymalnej liczby tokenów
       const maxTokensRaw = await crowdsale.maxTokens();
-      console.log('Maksymalna liczba tokenów (surowa):', maxTokensRaw.toString());
-
       const maxTokens = formatUnits(maxTokensRaw, 18);
       setMaxTokens(maxTokens);
-      console.log('Sformatowana maksymalna liczba tokenów:', maxTokens);
 
-      // Pobieranie minimalnej liczby tokenów
       const minTokensRaw = await crowdsale.minTokens();
-      console.log('Minimalna liczba tokenów (surowa):', minTokensRaw.toString());
-
       const minTokens = formatUnits(minTokensRaw, 18);
       setMinTokens(minTokens);
-      console.log('Sformatowana minimalna liczba tokenów:', minTokens);
 
-      // Pobieranie maksymalnej liczby tokenów do zakupu
       const maxPurchaseTokensRaw = await crowdsale.maxPurchaseTokens();
-      console.log('Maksymalna liczba tokenów do zakupu (surowa):', maxPurchaseTokensRaw.toString());
-
       const maxPurchaseTokens = formatUnits(maxPurchaseTokensRaw, 18);
       setMaxPurchaseTokens(maxPurchaseTokens);
-      console.log('Sformatowana maksymalna liczba tokenów do zakupu:', maxPurchaseTokens);
 
-      // Pobieranie liczby sprzedanych tokenów
       const tokensSoldRaw = await crowdsale.tokensSold();
-      console.log('Sprzedane tokeny (surowe):', tokensSoldRaw.toString());
-
       const tokensSold = formatUnits(tokensSoldRaw, 18);
       setTokensSold(tokensSold);
-      console.log('Sformatowana liczba sprzedanych tokenów:', tokensSold);
 
-      // Sprawdzanie, czy użytkownik jest na białej liście
       const isUserWhitelisted = await crowdsale.isWhitelisted(account);
       setIsWhitelisted(isUserWhitelisted);
-      console.log(`Czy użytkownik jest na białej liście: ${isUserWhitelisted}`);
 
-      // Pobieranie stanu sprzedaży
       const currentSaleState = await crowdsale.getState();
-      console.log('Aktualny stan sprzedaży (surowy):', currentSaleState.toString());
       setSaleState(currentSaleState === 0n ? 'Open' : 'Closed');
-      console.log('Aktualny stan sprzedaży:', saleState);
-
-      // Dodatkowe dane tokena (opcjonalnie)
-
-      // Pobieranie uprawnienia (allowance) (jeśli dotyczy)
-      const allowanceRaw = await token.allowance(account, crowdsale.address);
-      console.log('Uprawnienie od konta do crowdsale (surowe):', allowanceRaw.toString());
-
-      const allowance = formatUnits(allowanceRaw, 18);
-      console.log('Sformatowane uprawnienie od konta do crowdsale:', allowance);
-
-      // Pobieranie salda tokenów kontraktu crowdsale
-      const crowdsaleTokenBalanceRaw = await token.balanceOf(crowdsale.address);
-      console.log('Saldo tokenów kontraktu crowdsale (surowe):', crowdsaleTokenBalanceRaw.toString());
-
-      const crowdsaleTokenBalance = formatUnits(crowdsaleTokenBalanceRaw, 18);
-      console.log('Sformatowane saldo tokenów kontraktu crowdsale:', crowdsaleTokenBalance);
 
       setIsLoading(false);
     } catch (error) {
-      console.error('Wystąpił błąd podczas ładowania danych blockchain:', error);
+      console.error('Error loading blockchain data:', error);
     }
   };
 
@@ -198,15 +110,15 @@ function App() {
     <Container className="text-light">
       <Navigation />
 
-      <h1 className="my-4 text-center">Przedstawiamy <span className="text-highlight">DApp Token!</span></h1>
+      <h1 className="my-4 text-center">Introducing <span className="text-highlight">DApp Token!</span></h1>
 
       {isLoading ? (
         <Loading />
       ) : (
         <>
           <CountdownTimer saleEnd={saleEnd} />
-          <p className="text-center"><strong>Aktualna cena:</strong> {price} ETH</p>
-          <p className="text-center"><strong>Stan sprzedaży:</strong> {saleState}</p>
+          <p className="text-center"><strong>Current Price:</strong> {price} ETH</p>
+          <p className="text-center"><strong>Sale Status:</strong> {saleState}</p>
           <Buy
             provider={provider}
             price={price}

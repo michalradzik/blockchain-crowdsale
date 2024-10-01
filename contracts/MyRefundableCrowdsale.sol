@@ -22,7 +22,7 @@ contract MyRefundableCrowdsale is Crowdsale, CappedCrowdsale, TimedCrowdsale, Re
         CappedCrowdsale(cap)
         TimedCrowdsale(openingTime, closingTime)
         RefundableCrowdsale(goal)
-        public // Dodaj specyfikator widoczności
+        public
     {
         require(goal <= cap, "Goal must be less than or equal to cap");
     }
