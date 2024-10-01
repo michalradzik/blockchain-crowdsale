@@ -2,8 +2,8 @@ require("@nomicfoundation/hardhat-ethers");
 require("@nomicfoundation/hardhat-chai-matchers");
 require("dotenv").config();
 
-const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env;
-
+//const { PRIVATE_KEYS, ALCHEMY_API_KEY, ETHERSCAN_API_KEY } = process.env;
+const privateKeys = process.env.PRIVATE_KEYS || ""
 module.exports = {
   solidity: {
     compilers: [
@@ -18,13 +18,8 @@ module.exports = {
   networks: {
     localhost: {},
     sepolia: {
-      url: `https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}`,
-      accounts: PRIVATE_KEYS ? PRIVATE_KEYS.split(",") : [],
-    },
-  },
-  etherscan: {
-    apiKey: {
-      sepolia: ETHERSCAN_API_KEY,
+      url: `https://eth-sepolia.g.alchemy.com/v2/${process.env.ALCHEMY_API_KEY}`,
+      accounts: privateKeys.split(",")
     },
   },
 };
